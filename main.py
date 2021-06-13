@@ -9,10 +9,14 @@ WINDOW_WIDTH = 900
 BLOCK_SIZE = 10
 GAME_SPEED = 350
 
+pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 horizontal_blocks = int(WINDOW_WIDTH / BLOCK_SIZE)
 vertical_blocks = int(WINDOW_HEIGHT / BLOCK_SIZE)
+start_button = pygame.Rect(10, 10, 80, 24)
+font = pygame.font.SysFont(pygame.font.get_default_font(), 24)
+start_button_text = font.render('Start/stop', True, BLACK)
 arr = [[False] * vertical_blocks for i in range(horizontal_blocks)]
 running = False
 
@@ -24,6 +28,11 @@ def draw_grid():
             pygame.draw.rect(screen, GRAY, rect, 1)
 
 
+def draw_buttons():
+    pygame.draw.rect(screen, WHITE, start_button)
+    screen.blit(start_button_text, start_button.topleft)
+
+
 def setBlockColor(x, y, color):
     coordX = x * BLOCK_SIZE
     coordY = y * BLOCK_SIZE
@@ -32,12 +41,9 @@ def setBlockColor(x, y, color):
 
 
 def toggleBlockState(pos):
-    global running
     x = int(pos[0] / BLOCK_SIZE)
     y = int(pos[1] / BLOCK_SIZE)
     arr[x][y] = not arr[x][y]
-    if x == 0 and y == 0:
-        running = not running
 
 
 def handle_events():
@@ -46,7 +52,12 @@ def handle_events():
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
-            toggleBlockState(pygame.mouse.get_pos())
+            if start_button.collidepoint(event.pos):
+                global running
+                running = not running
+            else:
+                toggleBlockState(pygame.mouse.get_pos())
+
 
 
 def draw_lifes():
@@ -93,12 +104,12 @@ def safe_list_get(l, x, y, default):
         return default
 
 
-pygame.init()
 while True:
     screen.fill(BLACK)
     handle_events()
     draw_lifes()
     draw_grid()
+    draw_buttons()
     pygame.display.update()
 
     if running:
